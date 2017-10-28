@@ -9,6 +9,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using System.Collections;
 using System.Media;
+using System.Threading.Tasks;
 
 namespace MakeLand
 {
@@ -404,15 +405,183 @@ namespace MakeLand
 
             int seaCount = 0;
             int landCount = 0;
-            int freshCount = 0;
+            int mountainCount = 0;
 
-            int every = 1;
+            Object thisLock = new Object();
 
-            for (int x = 0; x < Params.dimX; x = x + every)
+            ParallelLoopResult loopResult = Parallel.For(0, Params.dimX, x =>
             {
+                for (int y = 0; y < Params.dimY; y++)
+                {
+                    switch (pheno[x, y])
+                    {
+                        case 0: // sea
+
+                            int tempSea = scoreSea(x, y);
+                            lock (thisLock)
+                            {
+                                seaCount++;
+                                score += tempSea;
+                            }
+                            break;
+                        case 1: // land
+                            
+                            int tempLand = scoreLand(x, y);
+                            lock (thisLock)
+                            {
+                                landCount++;
+                                score += tempLand;
+                            }
+                            break;
+                        case 2: // mountains
+                            int tempMountain = scoreMountains(x, y);
+                            lock (thisLock)
+                            {
+                                mountainCount++;
+                                score += tempMountain;
+                            }
+                            
+                            break;
+                    }
+                }
+            });
+
+            float totalCount = landCount + seaCount + mountainCount;
+
+            // Score up if > 50% land
+            if ((landCount / totalCount) > totalCount * 0.5)
+            {
+                score += 10;
+            }
+            // Score down if > 40% sea
+            if ((seaCount / totalCount) < totalCount * 0.4)
+            {
+                score -= 10;
+            }
+            // score up if < 15% mountain
+            if ((mountainCount / totalCount) < totalCount * 0.15)
+            {
+                score += 5;
+            }
+            // score down if 
+            if ((mountainCount / totalCount) > totalCount * 0.1)
+            {
+                score -= 5;
             }
 
-            return 0;
+            return score;
+        }
+
+        private int scoreLand(int x, int y)
+        {
+            int tempScore = 0;
+            for (int xx = -1; xx < 2; xx++)
+            {
+                for (int yy = -1; yy < 2; yy++)
+                {
+                    // score up if connected to more land
+                    if (isValidPoint(x + xx, y + yy))
+                    {
+                        if (pheno[x + xx, y + yy] == 1)
+                        {
+                            tempScore++;
+                        }
+                    }
+
+                    // score down if there is too much land together (aiming for an Archipelago feel)
+                    if (isValidPoint(x + xx * 20, y + yy * 20))
+                    {
+                        if (pheno[x + xx * 20, y + yy * 20] == 1)
+                        {
+                            tempScore--;
+                        }
+                    }
+                }
+            }
+
+            return tempScore;
+        }
+
+        private int scoreMountains(int x, int y)
+        {
+            int tempScore = 0;
+            int numDirectionsMountains = 0;
+            for (int xx = -1; xx < 2; xx++)
+            {
+                for (int yy = -1; yy < 2; yy++)
+                {
+                    // score up if connected to more land
+                    if (isValidPoint(x + xx, y + yy))
+                        {
+                        if (pheno[x + xx, y + yy] == 2)
+                        {
+                            numDirectionsMountains++;
+                            // discorage more than 4 directions for mountains
+                            if (numDirectionsMountains > 4)
+                            {
+                                tempScore--;
+                            }
+                            else
+                            {
+                                tempScore++;
+                            }
+                        }
+                    }
+
+                    // score down if there is too many mountains together
+                    if (isValidPoint(x + xx * 5, y + yy * 5))
+                    {
+                        if (pheno[x + xx * 5, y + yy * 5] == 2)
+                        {
+                            tempScore--;
+                        }
+                    }
+                }
+            }
+
+            return tempScore;
+        }
+
+        private int scoreSea(int x, int y)
+        {
+            int tempScore = 0;
+            Object thisLock = new Object();
+
+            for (int xx = -1; xx < 2; xx++)
+            {
+                for (int yy = -1; yy < 2; yy++)
+                {
+                    // score up if connected to more water
+                    if (isValidPoint(x + xx, y + yy))
+                    {
+                        if (pheno[x + xx, y + yy] == 0)
+                        {
+                            tempScore++;
+                        }
+                    }
+
+                    // score down if there is too much water together (we want rivers)
+                    if (isValidPoint(x + xx*10, y + yy*10))
+                    {
+                        if (pheno[x + xx * 10, y + yy * 10] == 0)
+                        {
+                            tempScore--;
+                        }
+                    }
+
+                    // score up if that water is within 10 samples of the edge
+                    if (x < 11 || y < 11 || x > Params.dimX - 11 || y > Params.dimY - 11)
+                    {
+                        tempScore+=2;
+                    }
+                }
+            }
+            return tempScore;
+        }
+
+        private bool isValidPoint(int x, int y)
+        {
+            return x >= 0 && x < Params.dimX && y >= 0 && y < Params.dimY;
         }
 
         /// <summary>
