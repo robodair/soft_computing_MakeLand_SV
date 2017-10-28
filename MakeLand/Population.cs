@@ -154,7 +154,10 @@ namespace MakeLand
                     Phenotype mumP = getPhenotype(mum);
                     Phenotype dadP = getPhenotype(dad);
                     Genotype ggg = makeGenome(mumP.genotype,dadP.genotype);
-                    if (Params.mutationPercent > r.Next(0,100)) mutate(ggg, r);
+                    if (Params.mutationPercent > r.Next(0, 100))
+                    {
+                        ggg = mutate(ggg, r);
+                    }
                     //checkDuplicateGenes(ggg);
                     maps[i] = new Phenotype(ggg, G.pop.generation);
 
@@ -179,9 +182,11 @@ namespace MakeLand
             return retv;
         }
 
-        public void mutate(Genotype g, Random r)
+        public Genotype mutate(Genotype g, Random r)
         {
             G.mutationCount++;
+            g = new Genotype(r);
+            return g;
         }
 
         /// <summary>
@@ -218,7 +223,7 @@ namespace MakeLand
                     Genotype kk = getPhenotype(k).genotype;
                     if (kk.equal(g))
                     {
-                        mutate(g, G.rnd);
+                        g = mutate(g, G.rnd);
                         G.dupGeneomeCount++;
                     }
                 }
@@ -271,7 +276,7 @@ namespace MakeLand
 
     public class Gene
     {
-        public int terrain=0;
+        public byte terrain=0;
         public int x=0;
         public int y=0;
         public int repeatY = 0;
@@ -282,7 +287,7 @@ namespace MakeLand
 
         }
 
-        public Gene(int ter, int xx, int yy, int rptX, int rptY)
+        public Gene(byte ter, int xx, int yy, int rptX, int rptY)
         {
             terrain = ter;
             x = xx;
@@ -297,7 +302,7 @@ namespace MakeLand
         /// <param name="r"></param>
         public Gene(Random r)
         {
-            terrain = r.Next(0,3);
+            terrain = (byte) r.Next(0,3);
             x = r.Next(0, Params.dimX);
             y = r.Next(0, Params.dimY);
             repeatX = r.Next(0, Params.maxRepeat);
@@ -331,13 +336,13 @@ namespace MakeLand
 
     public class Phenotype
     {
-        public Genotype genotype=null; // reference class - this is a pointer not a copy
-        int[,] pheno = null;
+        public Genotype genotype = null; // reference class - this is a pointer not a copy
+        byte[,] pheno = null;
         Bitmap bitm = null;
         public int score = 0;
         public bool alive = true;
         public bool newborn = true;
-        public int gen = 0; 
+        public int gen = 0;
 
         /// <summary>
         /// Default constructor probably not helpfull
@@ -365,9 +370,9 @@ namespace MakeLand
         /// </summary>
         public void createPheno()
         {
-            pheno = new int[Params.dimX, Params.dimY];
-            for (int x=0; x< Params.dimX;x++)
-                for (int y=0; y< Params.dimY;y++) { pheno[x,y] = 0; } // initialise to 0
+            pheno = new byte[Params.dimX, Params.dimY];
+            for (int x = 0; x < Params.dimX; x++)
+                for (int y = 0; y < Params.dimY; y++) { pheno[x, y] = 0; } // initialise to 0
 
             for (int i = 0; i < Params.genotypeSize; i++)
             {
@@ -375,10 +380,10 @@ namespace MakeLand
                 for (int kx = 0; kx < g.repeatX; kx++)
                     for (int ky = 0; ky < g.repeatY; ky++)
                     {
-                        int x = g.x+kx;
-                        int y = g.y+ky;
-                    if (y< Params.dimY && x< Params.dimX) pheno[x, y] = g.terrain;
-                }
+                        int x = g.x + kx;
+                        int y = g.y + ky;
+                        if (y < Params.dimY && x < Params.dimX) pheno[x, y] = g.terrain;
+                    }
 
             }
         }
