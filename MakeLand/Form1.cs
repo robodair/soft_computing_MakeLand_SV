@@ -24,26 +24,26 @@ namespace MakeLand
 
         private void button2_Click(object sender, EventArgs e)
         {
-            //G.init();
-            //if (G.form2 == null) G.form2 = new Form2();
-            //G.form2.Show();
-            //G.form2.Activate();
+            G.init();
+            if (G.form2 == null) G.form2 = new Form2();
+            G.form2.Show();
+            G.form2.Activate();
 
-            //Genotype gt = new Genotype(G.rnd);
-            //Phenotype pt = new Phenotype(gt,0);
-            //pt.show(G.form2.getPictureBox1());
+            Genotype gt = new Genotype(G.rnd);
+            Phenotype pt = new Phenotype(gt, 0);
+            pt.show(G.form2.getPictureBox1());
 
-            //G.pop = new Population(Params.populationCnt, G.rnd);
-            //G.pop.unsetNewborn();
+            G.pop = new Population(Params.populationCnt, G.rnd);
+            G.pop.unsetNewborn();
 
         }
 
         private void button3_Click(object sender, EventArgs e)
         {
-            //Phenotype pt = G.pop.getPhenotype(G.popCount);
-            //pt.show(G.form2.getPictureBox1());
-            //G.popCount ++;
-            //label7.Text = G.popCount.ToString();
+            Phenotype pt = G.pop.getPhenotype(G.popCount);
+            pt.show(G.form2.getPictureBox1());
+            G.popCount++;
+            label7.Text = G.popCount.ToString();
         }
 
         public void Messageline1(String s)
