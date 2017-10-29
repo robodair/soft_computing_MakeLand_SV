@@ -159,10 +159,14 @@ namespace MakeLand
                     {
                         ggg = mutate(ggg, r);
                     }
-                    //checkDuplicateGenes(ggg);
+                    checkDuplicateGenes(ggg);
                     maps[i] = new Phenotype(ggg, G.pop.generation);
 
                 }
+            }
+            if (generation % Params.checkDuplicateGenomes == 0)
+            {
+                checkDuplicateGenotypes();
             }
         }
 
