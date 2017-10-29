@@ -502,25 +502,30 @@ namespace MakeLand
 
             float totalCount = landCount + seaCount + mountainCount;
 
-            // Score up if > 50% land
-            if ((landCount / totalCount) > totalCount * 0.5)
+            float nearEnough = 0.5f;
+
+            // Adjust score depending on how close to target land count it is
+            int targetLandCount = (int) (totalCount * 0.5f);
+            int landDiff = Math.Abs(targetLandCount - landCount);
+            if (landDiff > totalCount * nearEnough)
             {
-                score += 10;
+                score -= landDiff;
             }
-            // Score down if > 40% sea
-            if ((seaCount / totalCount) < totalCount * 0.4)
+
+            // Adjust score depending on how close to target mountains count it is
+            int targetMountainsCount = (int)(totalCount * 0.15f);
+            int mountainDiff = Math.Abs(targetMountainsCount - mountainCount);
+            if (mountainDiff > totalCount * nearEnough)
             {
-                score -= 10;
+                score -= mountainDiff;
             }
-            // score up if < 15% mountain
-            if ((mountainCount / totalCount) < totalCount * 0.15)
+
+            // Adjust score depending on how close to target sea count it is
+            int targetSeaCount = (int)(totalCount * 0.4f);
+            int seaDiff = Math.Abs(targetSeaCount - seaCount);
+            if (seaDiff > totalCount * nearEnough)
             {
-                score += 5;
-            }
-            // score down if 
-            if ((mountainCount / totalCount) > totalCount * 0.1)
-            {
-                score -= 5;
+                score -= seaDiff;
             }
 
             return score;
@@ -623,8 +628,9 @@ namespace MakeLand
                         }
                     }
 
-                    // score up if that water is within 10 samples of the edge
-                    if (x < 11 || y < 11 || x > Params.dimX - 11 || y > Params.dimY - 11)
+                    // score up if that water is near the edge
+                    int margin = Params.dimX / 10;
+                    if (x < margin || y < margin || x > Params.dimX - margin || y > Params.dimY - margin)
                     {
                         tempScore+=2;
                     }
