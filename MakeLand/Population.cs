@@ -190,7 +190,57 @@ namespace MakeLand
         public Genotype mutate(Genotype g, Random r)
         {
             G.mutationCount++;
-            g = new Genotype(r);
+            // How many to modify?
+            int genesToModify = r.Next(g.genes.Length);
+            int[] whichGenes = new int[genesToModify];
+            // Which to modify?
+            for (int i = 0; i < genesToModify; i++)
+            {
+                whichGenes[i] = r.Next(g.genes.Length);
+            }
+            // Do the modification
+            for (int i = 0; i < genesToModify; i++)
+            {
+                int geneIndex = whichGenes[i];
+                int type = r.Next(13);
+                switch (type)
+                {
+                    case 0:
+                    case 1:
+                        // roll new gene
+                        g.genes[geneIndex] = new Gene(r);
+                        break;
+                    case 2:
+                    case 3:
+                        // new random x
+                        g.genes[geneIndex].x = r.Next(0, Params.dimX);
+                        break;
+                    case 4:
+                    case 5:
+                        // new random y
+                        g.genes[geneIndex].y = r.Next(0, Params.dimY);
+                        break;
+                    case 6:
+                    case 7:
+                        // new terrain
+                        g.genes[geneIndex].terrain = (byte) r.Next(0, 3);
+                        break;
+                    case 8:
+                    case 9:
+                        // new repeatx
+                        g.genes[geneIndex].repeatX = r.Next(0, Params.maxRepeat);
+                        break;
+                    case 10:
+                    case 11:
+                        // new repeaty
+                        g.genes[geneIndex].repeatY = r.Next(0, Params.maxRepeat);
+                        break;
+                    case 12:
+                        // roll a new genome
+                        g = new Genotype(r);
+                        break;
+                }
+            }
             return g;
         }
 
