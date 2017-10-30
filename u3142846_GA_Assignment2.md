@@ -393,7 +393,7 @@ Duplicate Genome Check|20
 
 Settings|Value
 -|-
-Generations|2000
+Generations|870
 Random Seed|2791282
 Population:|400
 Genes|4000
